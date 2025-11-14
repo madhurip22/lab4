@@ -1,1 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>WA COVID-19 Death Rate</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<style>
+body { margin:0; padding:0; }
+#map { height:100vh; }
+.info {
+    padding:6px 8px;
+    background:white;
+    background:rgba(255,255,255,0.8);
+    border-radius:5px;
+}
+.legend {
+    line-height:18px;
+    color:#555;
+    background:white;
+    padding:8px;
+    border-radius:5px;
+}
+.legend i {
+    width:18px;
+    height:18px;
+    float:left;
+    margin-right:8px;
+    opacity:0.8;
+}
+</style>
+</head>
+
+<body>
+<h2 style="text-align:center;margin:10px;">WA COVID-19 Death Rate per 10,000</h2>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+let map = L.map('map').setView([47.5,-120.5],6.5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:11}).addTo(map);
+
+let info = L.control();
+info.onAdd = function() {
+    this._div = L.DomUtil.create('div','info');
+    this.update();
+    return this._div;
+};
+info.update = function(props) {
+    this._div.innerHTML = props ? props.NAME + '<br>' + props.death_rate + ' per 10k' : 'Hover over a county';
+};
+info.addTo(map);
+
+function getColor(d){
+    return d>30?'#4d004b':
+           d>25?'#810f7c':
+           d>20?'#88419d':
+           d>15?'#8c6bb1':
+           d>10?'#8c96c6':
+           d>5?'#9ebcda':
+                 '#e0ecf4';
+}
+
+function style(f){
+    return {
+        fillColor:getColor(f.properties.death_rate),
+        weight:1,
+        color:'#333',
+        fillOpacity:.75
+    };
+}
+
+function highlight(e){
+    let l=e.target;
+    l.setStyle({weight:3,color:'#000',fillOpacity:.9});
+    info.update(l.feature.properties);
+}
+function reset(e){
+    geojson.resetStyle(e.target);
+    info.update();
+}
+function onEach(f,l){
+    l.on({mouseover:highlight,mouseout:reset});
+}
+
+let geojson;
+fetch("assets/wa-covid-data-102521.geojson")
+.then(r=>r.json())
+.then(d=>{
+    geojson=L.geoJson(d,{style:style,onEachFeature:onEach}).addTo(map);
+});
+
+let legend = L.control({position:'bottomright'});
+legend.onAdd=function(){
+    let d=L.DomUtil.create('div','legend');
+    let grades=[0,5,10,15,20,25,30];
+    for(let i=0; i<grades.length; i++){
+        d.innerHTML += '<i style="background:'+getColor(grades[i]+0.1)+'"></i> ' +
+        grades[i] + (grades[i+1]?'–'+grades[i+1]+'<br>':'+');
+    }
+    return d;
+};
+legend.addTo(map);
+</script>
+</body>
+</html>
 
