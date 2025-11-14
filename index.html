@@ -83,7 +83,7 @@ function onEach(f,l){
 }
 
 let geojson;
-fetch("assets/wa-covid-data-102521.geojson")
+fetch("assets/wa-covid-data-102521.json")
 .then(r=>r.json())
 .then(d=>{
     geojson=L.geoJson(d,{style:style,onEachFeature:onEach}).addTo(map);
