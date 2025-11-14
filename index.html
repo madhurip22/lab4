@@ -37,6 +37,7 @@ function getColor(d){
 fetch("assets/wa-covid-data-102521.geojson")
 .then(r=>r.json())
 .then(d=>{
+    console.log(d.features[0].properties);
     L.geoJson(d,{
         style: f=>({fillColor:getColor(f.properties.deathPer10k),weight:1,color:'#333',fillOpacity:.75}),
         onEachFeature: (f,l)=>l.bindPopup(f.properties.name+': '+f.properties.deathPer10k+' per 10k')
