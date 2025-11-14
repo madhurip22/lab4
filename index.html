@@ -7,6 +7,7 @@
 <style>
 body { margin:0; padding:0; }
 #map { height:100vh; }
+#debug { position:absolute; top:60px; left:10px; background:white; padding:10px; z-index:1000; max-width:300px; }
 .legend {
     line-height:18px;
     color:#555;
@@ -24,6 +25,7 @@ body { margin:0; padding:0; }
 </head>
 <body>
 <h2 style="text-align:center;margin:10px;">WA COVID-19 Death Rate per 10,000</h2>
+<div id="debug"></div>
 <div id="map"></div>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
@@ -37,7 +39,7 @@ function getColor(d){
 fetch("assets/wa-covid-data-102521.geojson")
 .then(r=>r.json())
 .then(d=>{
-    console.log(d.features[0].properties);
+    document.getElementById('debug').innerHTML = 'Properties: ' + Object.keys(d.features[0].properties).join(', ');
     L.geoJson(d,{
         style: f=>({fillColor:getColor(f.properties.deathPer10k),weight:1,color:'#333',fillOpacity:.75}),
         onEachFeature: (f,l)=>l.bindPopup(f.properties.name+': '+f.properties.deathPer10k+' per 10k')
